@@ -1,0 +1,568 @@
+openapi: 3.0.1
+info:
+  title: Server
+  description: API for managing facilities, reservations, and time slots.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5208
+
+paths:
+  /facility:
+    get:
+      summary: Get a list of facilities
+      tags:
+        - Facility
+      operationId: getAllFacilities
+      responses:
+        "200":
+          description: A list of facilities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FacilityDto"
+              example:
+                - id: 1
+                  facilityType: "Gym"
+                  name: "Sporto klubas"
+                  address: "Kauno g. 67, Kaunas"
+                  description: "Sporto klubas jūsų tikslams įvykdyti."
+                  pictureUrl: "https://shorturl.at/..."
+                  phoneNumber: "37064444444"
+                  emailAddress: "sveikata@klubas.com"
+                  maxNumberOfParticipants: 1
+                  facilityTypeId: 1   
+        "404":
+          $ref: "#/components/responses/NotFound"             
+    post:
+      summary: Create a new facility
+      tags:
+        - Facility
+      operationId: createFacility
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFacilityDto"
+            example:
+              - id: 1
+                facilityType: "Gym"
+                name: "Sporto klubas"
+                address: "Kauno g. 67, Kaunas"
+                description: "Sporto klubas jūsų tikslams įvykdyti."
+                pictureUrl: "https://shorturl.at/..."
+                phoneNumber: "37064444444"
+                emailAddress: "sveikata@klubas.com"
+                maxNumberOfParticipants: 1
+                facilityTypeId: 1   
+      responses:
+        "201":
+          description: Facility created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacilityDto"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+  /facility/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get a facility by ID
+      tags:
+        - Facility
+      operationId: getFacilityById
+      responses:
+        "200":
+          description: A facility
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacilityDto"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Update a facility by ID
+      tags:
+        - Facility
+      operationId: updateFacility
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFacilityDto"
+      responses:
+        "200":
+          description: Facility updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacilityDto"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+    delete:
+      summary: Delete a facility by ID
+      tags:
+        - Facility
+      operationId: deleteFacility
+      responses:
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "204":
+          description: Facility deleted successfully
+  /facility/{facilityId}/timeSlot/TimeSlot:
+    parameters:
+      - name: facilityId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get time slots for a facility
+      tags:
+        - TimeSlot
+      operationId: getTimeSlots
+      responses:
+        "200":
+          description: A list of time slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimeSlotDto"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      summary: Create a time slot for a facility
+      tags:
+        - TimeSlot
+      operationId: createTimeSlot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTimeSlotDto"
+      responses:
+        "200":
+          description: Time slot created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeSlotDto"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /api/v1/facility/{facilityId}/timeSlot/{id}:
+    parameters:
+      - name: facilityId
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get a time slot by ID for a facility
+      tags:
+        - TimeSlot
+      operationId: getTimeSlotById
+      responses:
+        "200":
+          description: A time slot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeSlotDto"
+    put:
+      summary: Update a time slot by ID for a facility
+      tags:
+        - TimeSlot
+      operationId: updateTimeSlot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTimeSlotDto"
+      responses:
+        "200":
+          description: Time slot updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeSlotDto"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+    delete:
+      summary: Delete a time slot by ID for a facility
+      tags:
+        - TimeSlot
+      operationId: deleteTimeSlot
+      responses:
+        "204":
+          description: Time slot deleted successfully
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /facility/{facilityId}/timeSlot/{timeSlotId}/Reservation:
+    parameters:
+      - name: facilityId
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: timeSlotId
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get reservations for a time slot
+      tags:
+        - Reservation
+      operationId: getReservations
+      responses:
+        "200":
+          description: A list of reservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReservationDto"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      summary: Create a reservation
+      tags:
+        - Reservation
+      operationId: createReservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReservationDto"
+      responses:
+        "200":
+          description: Reservation created successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /facility/{facilityId}/timeSlot/{timeSlotId}/Reservation/{id}:
+    parameters:
+      - name: facilityId
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: timeSlotId
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get a reservation by ID
+      tags:
+        - Reservation
+      operationId: getReservationById
+      responses:
+        "200":
+          description: A reservation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReservationDto"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Update a reservation by ID
+      tags:
+        - Reservation
+      operationId: updateReservation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReservationDto"
+      responses:
+        "200":
+          description: Reservation updated successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+    delete:
+      summary: Delete a reservation by ID
+      tags:
+        - Reservation
+      operationId: deleteReservation
+      responses:
+        "204":
+          description: Reservation deleted successfully
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  schemas:
+    FacilityDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        description:
+          type: string
+        pictureUrl:
+          type: string
+        phoneNumber:
+          type: string
+        emailAddress:
+          type: string
+        maxNumberOfParticipants:
+          type: integer
+        facilityTypeId:
+          type: integer
+        facilityType:
+          type: string
+        timeSlots:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSlotDto"
+    CreateFacilityDto:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+        address:
+          type: string
+          minLength: 2
+          maxLength: 100
+        description:
+          type: string
+        pictureUrl:
+          type: string
+        phoneNumber:
+          type: string
+          maxLength: 20
+        emailAddress:
+          type: string
+          pattern: "^.+@.+$"
+          nullable: false
+        maxNumberOfParticipants:
+          type: integer
+          nullable: true
+        facilityTypeId:
+          type: integer
+      required:
+        - name
+        - address
+        - phoneNumber
+        - emailAddress
+        - facilityTypeId
+    UpdateFacilityDto:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 255
+          nullable: false
+        address:
+          type: string
+          minLength: 2
+          maxLength: 100
+          nullable: false
+        description:
+          type: string
+        pictureUrl:
+          type: string
+        phoneNumber:
+          type: string
+          maxLength: 20
+          nullable: false
+        emailAddress:
+          type: string
+          pattern: "^.+@.+$"
+          nullable: false
+        maxNumberOfParticipants:
+          type: integer
+          nullable: true
+        facilityTypeId:
+          type: integer
+      required:
+        - name
+        - address
+        - phoneNumber
+        - emailAddress
+        - facilityTypeId
+    ReservationDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        userName:
+          type: string
+        userSurname:
+          type: string
+        reservationDate:
+          type: string
+          format: date-time
+          nullable: false
+        reservationStatus:
+          type: string
+        numberOfParticipants:
+          type: integer
+        timeSlotId:
+          type: integer
+    CreateReservationDto:
+      type: object
+      properties:
+        userId:
+          type: string
+          nullable: false
+        reservationDate:
+          type: string
+          format: date-time
+          nullable: false
+        numberOfParticipants:
+          type: integer
+      required:
+        - reservationDate
+        - userId
+    UpdateReservationDto:
+      type: object
+      properties:
+        reservationDate:
+          type: string
+          format: date-time
+          nullable: false
+        numberOfParticipants:
+          type: integer
+      required:
+        - reservationDate
+    TimeSlotDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        facilityId:
+          type: integer
+        reservations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReservationDto"
+    CreateTimeSlotDto:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          description: |
+            The start time of the time slot. Must be provided and must be earlier than 'endTime'.
+        endTime:
+          type: string
+          format: date-time
+          description: |
+            The end time of the time slot. Must be provided and must be later than 'startTime'.
+      required:
+        - startTime
+        - endTime
+    UpdateTimeSlotDto:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: date-time
+          description: |
+            The start time of the time slot. Must be provided and must be earlier than 'endTime'.
+        endTime:
+          type: string
+          format: date-time
+          description: |
+            The end time of the time slot. Must be provided and must be later than 'startTime'.
+      required:
+        - startTime
+        - endTime
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI reference that identifies the problem type.
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type.
+        status:
+          type: integer
+          format: int32
+          description: The HTTP status code applicable to this problem.
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem.
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence of the problem.
+        errors:
+          type: object
+          description: A map of detailed errors for every property ([property => error])
+  responses:
+    UnprocessableEntity:
+      description: Unprocessable entity response
+      content:
+        application/problem+json:
+          schema:
+            type: object
+            items:
+              $ref: "#/components/schemas/ProblemDetails"
+          example:
+            type: "https://tools.ietf.org/html/rfc4918#section-11.2"
+            title: "Unprocessable Entity"
+            status: 422
+            detail: "One or more validation errorrs occurred"
+            errors:
+              Name:
+                - "'Name' must not be empty."
+    BadRequest:
+      description: Bad request response
+    NotFound:
+      description: Resource was not found
