@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Server.CustomExceptions;
 using Server.Domain;
+using Server.Domain.Auth;
 using Server.Persistence;
 using Server.Persistence.Abstractions.Facility;
 using Server.Persistence.Abstractions.Reservation;
@@ -11,11 +13,11 @@ namespace Server.Services
 {
     public interface IFacilitiesService
     {
-        Task<FacilityDto> CreateAsync(CreateFacilityDto request);
-        Task<bool> DeleteAsync(int id);
+        Task<FacilityDto> CreateAsync(string userId, CreateFacilityDto request);
+        Task<bool> DeleteAsync(string userId, bool isAdmin, int id);
         Task<FacilityDto?> GetByIdAsync(int id);
         Task<ICollection<FacilityDto>?> GetListAsync();
-        Task<FacilityDto?> UpdateAsync(int id, UpdateFacilityDto request);
+        Task<FacilityDto?> UpdateAsync(string userId, bool isAdmin, int id, UpdateFacilityDto request);
     }
 
     public class FacilitiesService : IFacilitiesService
@@ -35,6 +37,7 @@ namespace Server.Services
                 .AsNoTracking()
                 .Include(f => f.TimeSlots)
                 .ThenInclude(ts => ts.Reservations)
+                .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
             if (facility == null)
@@ -52,6 +55,7 @@ namespace Server.Services
                 .AsNoTracking()
                 .Include(f => f.TimeSlots)
                 .ThenInclude(ts => ts.Reservations)
+                .ThenInclude(r => r.User)
                 .ToListAsync();
 
             if (facilities.Count == 0)
@@ -62,7 +66,7 @@ namespace Server.Services
             return facilities.Select(ToContract).ToList();
         }
 
-        public async Task<FacilityDto> CreateAsync(CreateFacilityDto request)
+        public async Task<FacilityDto> CreateAsync(string userId, CreateFacilityDto request)
         {
             _validator.Validate(request, opt => opt.ThrowOnFailures());
 
@@ -75,7 +79,8 @@ namespace Server.Services
                 PhoneNumber = request.PhoneNumber,
                 EmailAddress = request.EmailAddress,
                 MaxNumberOfParticipants = request.MaxNumberOfParticipants,
-                FacilityType = (FacilityType)request.FacilityTypeId
+                FacilityType = (FacilityType)request.FacilityTypeId,
+                CreatedById = userId
             };
 
             _context.Facilities.Add(entity);
@@ -84,7 +89,7 @@ namespace Server.Services
             return ToContract(entity);
         }
 
-        public async Task<FacilityDto?> UpdateAsync(int id, UpdateFacilityDto request)
+        public async Task<FacilityDto?> UpdateAsync(string userId, bool isAdmin, int id, UpdateFacilityDto request)
         {
             _validator.Validate(request, opt => opt.ThrowOnFailures());
 
@@ -92,6 +97,11 @@ namespace Server.Services
             if (facility == null)
             {
                 return null;
+            }
+
+            if (facility.CreatedById != userId && !isAdmin)
+            {
+                throw new ForbiddenActionException("Only the record owner or an administrator can update this record.");
             }
 
             facility.Name = request.Name;
@@ -107,12 +117,17 @@ namespace Server.Services
             return ToContract(facility);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(string userId, bool isAdmin, int id)
         {
             var facility = await _context.Facilities.FindAsync(id);
             if (facility == null)
             {
                 return false;
+            }
+
+            if (facility.CreatedById != userId && !isAdmin)
+            {
+                throw new ForbiddenActionException("Only the record owner or an administrator can delete this record.");
             }
 
             _context.Facilities.Remove(facility);
@@ -132,13 +147,14 @@ namespace Server.Services
                     Id = ts.Id,
                     StartTime = new DateTime(defaultDateOnly, ts.StartTime),
                     EndTime = new DateTime(defaultDateOnly, ts.EndTime),
+                    CreatedById = ts.CreatedById,
                     FacilityId = entity.Id,
                     Reservations = ts.Reservations.Select(r => new ReservationDto()
                     {
                         Id = r.Id,
                         UserId = r.UserId,
-                        UserName = "John",
-                        UserSurname = "Doe",
+                        UserName = r.User.UserName!,
+                        UserEmail = r.User.Email!,
                         ReservationDate = new DateTime(r.ReservationDate, new TimeOnly()),
                         ReservationStatus = r.ReservationStatus.ToString(),
                         NumberOfParticipants = r.NumberOfParticipants,
@@ -159,6 +175,7 @@ namespace Server.Services
                 MaxNumberOfParticipants = entity.MaxNumberOfParticipants,
                 FacilityType = entity.FacilityType.ToString(),
                 FacilityTypeId = (int)entity.FacilityType,
+                CreatedById = entity.CreatedById,
                 TimeSlots = timeSlots
             };
         }

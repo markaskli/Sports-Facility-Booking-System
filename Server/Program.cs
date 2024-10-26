@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
         .AddServices()
         .AddValidationServices()
         .AddDbContext<ReservationDbContext>(opt => opt.UseNpgsql(builder.Configuration["ConnectionStrings:DefaultConnection"]))
+        .AddAuthServices(builder.Configuration)
         .AddEndpointsApiExplorer()
         .AddSwaggerGen();
 }
@@ -20,8 +21,17 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbSeeder = scope.ServiceProvider.GetRequiredService<DbInitialization>();
+    await dbSeeder.SeedAuth();
+}
 
 app.MapControllers();
 app.Run();

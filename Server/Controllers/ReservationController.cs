@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Server.Persistence.Abstractions.Reservation;
 using Server.Services;
 
 namespace Server.Controllers
 {
     [Route("api/v1/facility/{facilityId}/timeSlot/{timeSlotId}/[controller]")]
-    [ApiController]
-    public class ReservationController : ControllerBase
+    public class ReservationController : BaseController
     {
         private readonly IReservationsService _reservationsService;
         public ReservationController(IReservationsService reservationsService)
@@ -41,14 +41,28 @@ namespace Server.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(int facilityId, int timeSlotId, CreateReservationDto request)
         {
-            var result = await _reservationsService.CreateAsync(facilityId, timeSlotId, request);
+            var userId = GetUserId();
+            if (userId == null)
+            {
+                return BadRequest("Provided access token is invalid.");
+            }
+
+            var result = await _reservationsService.CreateAsync(userId, facilityId, timeSlotId, request);
             return CreatedAtAction(nameof(GetById), new { facilityId, timeSlotId = result.TimeSlotId, id = result.Id }, result);
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(int facilityId, int timeSlotId, int id, UpdateReservationDto request)
         {
-            var result = await _reservationsService.UpdateAsync(facilityId, timeSlotId, id, request);
+            var userId = GetUserId();
+            if (userId == null)
+            {
+                return BadRequest("Provided access token is invalid.");
+            }
+
+            var isAdmin = IsAdmin();
+
+            var result = await _reservationsService.UpdateAsync(userId, isAdmin, facilityId, timeSlotId, id, request);
             if (result == null)
             {
                 return NotFound();
@@ -60,7 +74,15 @@ namespace Server.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int facilityId, int timeSlotId, int id)
         {
-            var result = await _reservationsService.DeleteAsync(facilityId, timeSlotId, id);
+            var userId = GetUserId();
+            if (userId == null)
+            {
+                return BadRequest("Provided access token is invalid.");
+            }
+
+            var isAdmin = IsAdmin();
+
+            var result = await _reservationsService.DeleteAsync(userId, isAdmin, facilityId, timeSlotId, id);
             if (result == false)
             {
                 return NotFound();

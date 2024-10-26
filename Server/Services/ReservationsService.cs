@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Server.CustomExceptions;
 using Server.Domain;
 using Server.Persistence;
 using Server.Persistence.Abstractions.Reservation;
@@ -8,11 +9,11 @@ namespace Server.Services
 {
     public interface IReservationsService
     {
-        Task<ReservationDto> CreateAsync(int facilityId, int timeSlotId, CreateReservationDto request);
-        Task<bool> DeleteAsync(int facilityId, int timeSlotId, int id);
+        Task<ReservationDto> CreateAsync(string userId, int facilityId, int timeSlotId, CreateReservationDto request);
+        Task<bool> DeleteAsync(string userId, bool isAdmin, int facilityId, int timeSlotId, int id);
         Task<ReservationDto?> GetByIdAsync(int facilityId, int timeSlotId, int id);
         Task<ICollection<ReservationDto>?> GetListAsync(int facilityId, int timeSlotId);
-        Task<ReservationDto?> UpdateAsync(int facilityId, int timeSlotId, int id, UpdateReservationDto request);
+        Task<ReservationDto?> UpdateAsync(string userId, bool isAdmin, int facilityId, int timeSlotId, int id, UpdateReservationDto request);
     }
 
     public class ReservationsService : IReservationsService
@@ -31,6 +32,7 @@ namespace Server.Services
             var reservation = await _context.Reservations
                 .AsNoTracking()
                 .Include(r => r.TimeSlot)
+                .Include(r => r.User)
                 .FirstOrDefaultAsync(r => r.Id == id && r.TimeSlotId == timeSlotId && r.TimeSlot.FacilityId == facilityId);
 
             if (reservation == null)
@@ -47,6 +49,7 @@ namespace Server.Services
             var reservations = await _context.Reservations
                 .AsNoTracking()
                 .Include(r => r.TimeSlot)
+                .Include(r => r.User)
                 .Where(r => r.TimeSlotId == timeSlotId && r.TimeSlot.FacilityId == facilityId)
                 .ToListAsync();
 
@@ -58,7 +61,7 @@ namespace Server.Services
             return reservations.Select(ToContract).ToList();
         }
 
-        public async Task<ReservationDto> CreateAsync(int facilityId, int timeSlotId, CreateReservationDto request)
+        public async Task<ReservationDto> CreateAsync(string userId, int facilityId, int timeSlotId, CreateReservationDto request)
         {
             _validator.Validate(request, opt => opt.ThrowOnFailures());
 
@@ -66,7 +69,7 @@ namespace Server.Services
 
             var reservation = new Reservation()
             {
-                UserId = request.UserId,
+                UserId = userId,
                 ReservationDate = DateOnly.FromDateTime(request.ReservationDate),
                 NumberOfParticipants = request.NumberOfParticipants,
                 TimeSlotId = timeSlotId,
@@ -78,7 +81,7 @@ namespace Server.Services
             return ToContract(reservation);
         }
 
-        public async Task<ReservationDto?> UpdateAsync(int facilityId, int timeSlotId, int id, UpdateReservationDto request)
+        public async Task<ReservationDto?> UpdateAsync(string userId, bool isAdmin, int facilityId, int timeSlotId, int id, UpdateReservationDto request)
         {
             _validator.Validate(request, opt => opt.ThrowOnFailures());
 
@@ -86,11 +89,17 @@ namespace Server.Services
 
             var reservation = await _context.Reservations
                 .Include(r => r.TimeSlot)
+                .Include(r => r.User)
                 .SingleOrDefaultAsync(r => r.Id == id && r.TimeSlotId == timeSlotId && r.TimeSlot.FacilityId == facilityId);
 
             if (reservation == null)
             {
                 return null;
+            }
+
+            if (reservation.UserId != userId && !isAdmin)
+            {
+                throw new ForbiddenActionException("Only the record owner or an administrator can update this information.");
             }
 
             // validate date
@@ -102,7 +111,7 @@ namespace Server.Services
             return ToContract(reservation);
         }
 
-        public async Task<bool> DeleteAsync(int facilityId, int timeSlotId, int id)
+        public async Task<bool> DeleteAsync(string userId, bool isAdmin, int facilityId, int timeSlotId, int id)
         {
             var reservation = await _context.Reservations
                 .Include(r => r.TimeSlot)
@@ -111,6 +120,11 @@ namespace Server.Services
             if (reservation == null)
             {
                 return false;
+            }
+
+            if (reservation.UserId != userId && !isAdmin)
+            {
+                throw new ForbiddenActionException("Only the record owner or an administrator can delete this record.");
             }
 
             _context.Reservations.Remove(reservation);
@@ -135,8 +149,8 @@ namespace Server.Services
                 Id = entity.Id,
                 ReservationDate = new DateTime(entity.ReservationDate, new TimeOnly()),
                 UserId = entity.UserId,
-                UserName = "John",
-                UserSurname = "Doe",
+                UserName = entity.User?.UserName,
+                UserEmail = entity.User?.Email,
                 NumberOfParticipants = entity.NumberOfParticipants,
                 ReservationStatus = entity.ReservationStatus.ToString(),
                 TimeSlotId = entity.TimeSlotId

@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Server.CustomExceptions;
 
 namespace Server.Middleware
 {
@@ -37,6 +38,12 @@ namespace Server.Middleware
                     problemDetails.Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4";
                     problemDetails.Status = StatusCodes.Status404NotFound;
                     problemDetails.Title = "Not Found";
+                    problemDetails.Detail = exception.Message;
+                    break;
+                case ForbiddenActionException:
+                    problemDetails.Type = "https://tools.ietf.org/html/rfc7231#section-6.5.3";
+                    problemDetails.Status = StatusCodes.Status403Forbidden;
+                    problemDetails.Title = "Forbidden";
                     problemDetails.Detail = exception.Message;
                     break;
                 default:

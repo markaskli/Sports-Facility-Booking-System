@@ -1,4 +1,6 @@
-﻿namespace Server.Domain
+﻿using Server.Domain.Auth;
+
+namespace Server.Domain
 {
     public class Facility
     {
@@ -11,8 +13,11 @@
         public string EmailAddress { get; set; } = null!;
         public int? MaxNumberOfParticipants { get; set; }
         public FacilityType FacilityType { get; set; }
+        public string CreatedById { get; set; }
+        public User CreatedBy { get; set; } = null!;
         public ICollection<TimeSlot> TimeSlots { get; set; }
         public ICollection<WorkingHours> WorkingHours { get; set; }
+
 
         public Facility()
         {

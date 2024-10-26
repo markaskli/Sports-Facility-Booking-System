@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Server.CustomExceptions;
 using Server.Domain;
 using Server.Persistence;
 using Server.Persistence.Abstractions.Reservation;
@@ -10,29 +11,30 @@ namespace Server.Services
 {
     public interface ITimeSlotsService
     {
-        Task<TimeSlotDto> CreateAsync(int facilityId, CreateTimeSlotDto request);
-        Task<bool> DeleteAsync(int facilityId, int id);
+        Task<TimeSlotDto> CreateAsync(string userId, int facilityId, CreateTimeSlotDto request);
+        Task<bool> DeleteAsync(string userId, bool isAdmin, int facilityId, int id);
         Task<TimeSlotDto?> GetByIdAsync(int facilityId, int id);
         Task<ICollection<TimeSlotDto>?> GetListAsync(int facilityId);
-        Task<TimeSlotDto?> UpdateAsync(int facilityId, int id, UpdateTimeSlotDto request);
+        Task<TimeSlotDto?> UpdateAsync(string userId, bool isAdmin, int facilityId, int id, UpdateTimeSlotDto request);
     }
 
     public class TimeSlotsService : ITimeSlotsService
     {
-        private readonly ReservationDbContext _context;
+        private readonly ReservationDbContext _dbContext;
         private readonly IValidator<BaseTimeSlotDto> _validator;
 
         public TimeSlotsService(ReservationDbContext context, IValidator<BaseTimeSlotDto> validator)
         {
-            _context = context;
+            _dbContext = context;
             _validator = validator;
         }
 
         public async Task<TimeSlotDto?> GetByIdAsync(int facilityId, int id)
         {
-            var timeSlot = await _context.TimeSlots
+            var timeSlot = await _dbContext.TimeSlots
                 .AsNoTracking()
                 .Include(ts => ts.Reservations)
+                .ThenInclude(r => r.User)
                 .SingleOrDefaultAsync(e => e.FacilityId == facilityId && e.Id == id);
 
             if (timeSlot == null)
@@ -46,9 +48,10 @@ namespace Server.Services
 
         public async Task<ICollection<TimeSlotDto>?> GetListAsync(int facilityId)
         {
-            var timeSlots = await _context.TimeSlots
+            var timeSlots = await _dbContext.TimeSlots
                 .AsNoTracking()
                 .Include(ts => ts.Reservations)
+                .ThenInclude(r => r.User)
                 .Where(ts => ts.FacilityId == facilityId)
                 .ToListAsync();
 
@@ -60,32 +63,33 @@ namespace Server.Services
             return timeSlots.Select(ToContract).ToList();
         }
 
-        public async Task<TimeSlotDto> CreateAsync(int facilityId, CreateTimeSlotDto request)
+        public async Task<TimeSlotDto> CreateAsync(string userId, int facilityId, CreateTimeSlotDto request)
         {
             _validator.Validate(request, opt => opt.ThrowOnFailures());
 
-            await ValidateFacilityId(facilityId);
+            await ValidateFacilityAndCreator(facilityId, userId);
 
             var timeSlot = new TimeSlot()
             {
                 StartTime = TimeOnly.FromDateTime(request.StartTime),
                 EndTime = TimeOnly.FromDateTime(request.EndTime),
-                FacilityId = facilityId
+                FacilityId = facilityId,
+                CreatedById = userId
             };
 
-            _context.TimeSlots.Add(timeSlot);
-            await _context.SaveChangesAsync();
+            _dbContext.TimeSlots.Add(timeSlot);
+            await _dbContext.SaveChangesAsync();
 
             return ToContract(timeSlot);
         }
 
-        public async Task<TimeSlotDto?> UpdateAsync(int facilityId, int id, UpdateTimeSlotDto request)
+        public async Task<TimeSlotDto?> UpdateAsync(string userId, bool isAdmin, int facilityId, int id, UpdateTimeSlotDto request)
         {
             _validator.Validate(request, opt => opt.ThrowOnFailures());
 
             await ValidateFacilityId(facilityId);
 
-            var timeSlot = await _context.TimeSlots
+            var timeSlot = await _dbContext.TimeSlots
                 .SingleOrDefaultAsync(ts => ts.Id == id && ts.FacilityId == facilityId);
 
             if (timeSlot == null)
@@ -93,16 +97,21 @@ namespace Server.Services
                 return null;
             }
 
+            if (timeSlot.CreatedById != userId && !isAdmin)
+            {
+                throw new ForbiddenActionException("Only the record owner or an administrator can update this information.");
+            }
+
             timeSlot.StartTime = TimeOnly.FromDateTime(request.StartTime);
             timeSlot.EndTime = TimeOnly.FromDateTime(request.EndTime);
-            await _context.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
             return ToContract(timeSlot);
         }
 
-        public async Task<bool> DeleteAsync(int facilityId, int id)
+        public async Task<bool> DeleteAsync(string userId, bool isAdmin, int facilityId, int id)
         {
-            var timeSlot = await _context.TimeSlots
+            var timeSlot = await _dbContext.TimeSlots
                 .SingleOrDefaultAsync(ts => ts.Id == id && ts.FacilityId == facilityId);
 
             if (timeSlot == null)
@@ -110,18 +119,37 @@ namespace Server.Services
                 return false;
             }
 
-            _context.TimeSlots.Remove(timeSlot);
-            await _context.SaveChangesAsync();
+            if (timeSlot.CreatedById != userId && !isAdmin)
+            {
+                throw new ForbiddenActionException("Only the record owner or an administrator can delete this record.");
+            }
+
+            _dbContext.TimeSlots.Remove(timeSlot);
+            await _dbContext.SaveChangesAsync();
 
             return true;
         }
 
         private async Task ValidateFacilityId(int facilityId)
         {
-            var isValid = await _context.Facilities.AnyAsync(f => f.Id == facilityId);
+            var isValid = await _dbContext.Facilities.AnyAsync(f => f.Id == facilityId);
             if (!isValid)
             {
                 throw new KeyNotFoundException($"Facility with ID {facilityId} was not found.");
+            }
+        }
+
+        private async Task ValidateFacilityAndCreator(int facilityId, string userId)
+        {
+            var facility = await _dbContext.Facilities.SingleOrDefaultAsync(f => f.Id == facilityId);
+            if (facility == null)
+            {
+                throw new KeyNotFoundException($"Facility with ID {facilityId} was not found.");
+            }
+
+            if (facility.CreatedById != userId)
+            {
+                throw new ForbiddenActionException("Only facility creator can add time slots.");
             }
         }
 
@@ -132,8 +160,8 @@ namespace Server.Services
                 {
                     Id = r.Id,
                     UserId = r.UserId,
-                    UserName = "John",
-                    UserSurname = "Doe",
+                    UserName = r.User.UserName!,
+                    UserEmail = r.User.Email!,
                     ReservationDate = new DateTime(r.ReservationDate, new TimeOnly()),
                     ReservationStatus = r.ReservationStatus.ToString(),
                     NumberOfParticipants = r.NumberOfParticipants,
@@ -149,6 +177,7 @@ namespace Server.Services
                 StartTime = new DateTime(defaultDateOnly, entity.StartTime),
                 EndTime = new DateTime(defaultDateOnly, entity.EndTime),
                 FacilityId = entity.FacilityId,
+                CreatedById = entity.CreatedById,
                 Reservations = reservations
             };
         }
