@@ -10,6 +10,5 @@
         public string EmailAddress { get; set; } = null!;
         public int? MaxNumberOfParticipants { get; set; }
         public int FacilityTypeId { get; set; }
-        public string CreatedById { get; set; } = null!;
     }
 }
