@@ -29,8 +29,18 @@ app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbSeeder = scope.ServiceProvider.GetRequiredService<DbInitialization>();
-    await dbSeeder.SeedAuth();
+    try
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ReservationDbContext>();
+        context.Database.Migrate();
+
+        var dbSeeder = scope.ServiceProvider.GetRequiredService<DbInitialization>();
+        await dbSeeder.SeedAuth();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred while initializing the database: {ex.Message}");
+    }
 }
 
 app.MapControllers();
