@@ -1,9 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Container, Typography, Box, TextField, Button } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Box,
+  TextField,
+  Button,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { RegisterUser } from "../../queries/authQueries";
+import { useState } from "react";
 
 export const Route = createFileRoute("/register/")({
   component: RegisterComponent,
@@ -11,6 +21,7 @@ export const Route = createFileRoute("/register/")({
 
 const registerSchema = z
   .object({
+    userName: z.string().min(1, "Username is required"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
@@ -23,6 +34,10 @@ const registerSchema = z
 type RegisterFormInputs = z.infer<typeof registerSchema>;
 
 function RegisterComponent() {
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const navigate = useNavigate({ from: "/register" });
+
   const {
     register,
     handleSubmit,
@@ -31,9 +46,19 @@ function RegisterComponent() {
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (data: RegisterFormInputs) => {
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+
+  const onSubmit = async (data: RegisterFormInputs) => {
     console.log("Register Data:", data);
-    // Add registration API call here
+    try {
+      await RegisterUser(data);
+      navigate({ to: "/login" });
+    } catch (error) {
+      setSnackbarMessage("Registration failed. Please try again.");
+      setOpenSnackbar(true);
+    }
   };
 
   return (
@@ -42,6 +67,15 @@ function RegisterComponent() {
         Register
       </Typography>
       <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
+        <TextField
+          label="Username"
+          type="userName"
+          fullWidth
+          {...register("userName")}
+          error={!!errors.userName}
+          helperText={errors.userName?.message}
+          sx={{ mb: 2 }}
+        />
         <TextField
           label="Email"
           type="email"
@@ -74,12 +108,25 @@ function RegisterComponent() {
         </Button>
         <Grid container justifyContent="center" sx={{ mt: 2 }}>
           <Grid>
-            <Link href="/login">
+            <Button component={Link} to="/login">
               Already have an account? Login
-            </Link>
+            </Button>
           </Grid>
         </Grid>
       </Box>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={5000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

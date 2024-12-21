@@ -1,22 +1,26 @@
 import { Container, Typography, Box, TextField, Button } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { LoginUser } from "../../queries/authQueries";
+import { useUser } from "../../contexts/userContext";
 
 export const Route = createFileRoute("/login/")({
   component: LoginComponent,
 });
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  userName: z.string().min(1, "Username is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type LoginFormInputs = z.infer<typeof loginSchema>;
 
 export function LoginComponent() {
+  const { setUser } = useUser();
+  const navigate = useNavigate({ from: "/login" });
   const {
     register,
     handleSubmit,
@@ -25,24 +29,38 @@ export function LoginComponent() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginFormInputs) => {
-    console.log("Login Data:", data);
-    // Add login API call here
+  const onSubmit = async (data: LoginFormInputs) => {
+    try {
+      const responseData = await LoginUser(data);
+      setUser({
+        userName: responseData.userName,
+        email: responseData.email,
+        role: "temp",
+      });
+      navigate({ to: "/" });
+    } catch (error) {
+      console.error("Login failed", error);
+    }
   };
 
   return (
-    <Container maxWidth="xs" sx={{ mt: 8 }}>
+    <Container
+      maxWidth="xs"
+      sx={{
+        mt: 8,
+      }}
+    >
       <Typography variant="h4" component="h1" align="center" gutterBottom>
         Login
       </Typography>
       <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
         <TextField
-          label="Email"
-          type="email"
+          label="Username"
+          type="userName"
           fullWidth
-          {...register("email")}
-          error={!!errors.email}
-          helperText={errors.email?.message}
+          {...register("userName")}
+          error={!!errors.userName}
+          helperText={errors.userName?.message}
           sx={{ mb: 2 }}
         />
         <TextField
@@ -57,16 +75,11 @@ export function LoginComponent() {
         <Button type="submit" variant="contained" color="primary" fullWidth>
           Login
         </Button>
-        <Grid container justifyContent="space-between" sx={{ mt: 2 }}>
+        <Grid container justifyContent="center" sx={{ mt: 2 }}>
           <Grid>
-            <Link href="/register">
+            <Button component={Link} to="/register">
               Don't have an account? Register
-            </Link>
-          </Grid>
-          <Grid>
-            <Link href="/forgot-password" >
-              Forgot Password?
-            </Link>
+            </Button>
           </Grid>
         </Grid>
       </Box>

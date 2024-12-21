@@ -13,8 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
         .AddSwaggerGen();
 }
 
+
 var app = builder.Build();
 app.UseExceptionHandler();
+
+app.UseCors(opt => {
+    opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:5173");
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

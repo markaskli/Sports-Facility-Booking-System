@@ -1,41 +1,21 @@
 import {
-  AppBar,
   Box,
   Button,
   Card,
   CardActions,
   CardContent,
   Container,
-  createTheme,
-  IconButton,
-  Menu,
-  MenuItem,
   Modal,
-  ThemeProvider,
-  Toolbar,
   Typography,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 export const Route = createFileRoute("/")({
-  component: HomePage,
-});
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#1E88E5",
-    },
-    secondary: {
-      main: "#FFC107",
-    },
-  },
-  typography: {
-    fontFamily: "Roboto, Arial, sans-serif",
-  },
+  component: HomePageComponent,
 });
 
 // Modal styles
@@ -51,69 +31,23 @@ const modalStyle = {
   borderRadius: "8px",
 };
 
-export function HomePage() {
+export function HomePageComponent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false); // User login state (mocked here)
 
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
-  const handleSettingsMenuClose = () => setIsSettingsMenuOpen(false);
-  const toggleLogin = () => {
-    setIsUserLoggedIn((prev) => !prev); // Toggle login/logout status
-  };
 
   return (
-    <ThemeProvider theme={theme}>
-      <AppBar position="sticky" color="primary">
-        <Toolbar>
-          {isMobile && (
-            <IconButton edge="start" color="inherit" aria-label="menu">
-              {/* <MenuIcon /> */}
-            </IconButton>
-          )}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Sports Booking
-          </Typography>
-          {!isMobile && (
-            <Link color="inherit" to="/facilities">
-              Facilities
-            </Link>
-          )}
-          {!isMobile && (
-            <Link color="inherit" to="/reservations">
-              Reservations
-            </Link>
-          )}
-
-          {/* Display login button when user is not logged in */}
-          {!isUserLoggedIn ? (
-            <Button color="inherit" onClick={toggleLogin}>
-              Login
-            </Button>
-          ) : (
-            <>
-              {/* Display icon when user is logged in */}
-              <IconButton color="inherit">
-                {/* <AccountCircle /> */}
-              </IconButton>
-              {/* Add logout option in settings menu */}
-              <Menu
-                open={isSettingsMenuOpen}
-                onClose={handleSettingsMenuClose}
-                anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                transformOrigin={{ vertical: "top", horizontal: "right" }}
-              >
-                <MenuItem onClick={toggleLogin}>Logout</MenuItem>
-              </Menu>
-            </>
-          )}
-        </Toolbar>
-      </AppBar>
-
-      <Container sx={{ mt: 4, mb: 4 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <Container sx={{ mt: 4, mb: 4, flex: 1 }}>
         <Typography
           variant="h3"
           component="h1"
@@ -121,7 +55,7 @@ export function HomePage() {
           color="primary"
           gutterBottom
         >
-          Welcome to Sports Booking
+          Welcome to Facilities Reservations
         </Typography>
         <Typography variant="body1" textAlign="center" sx={{ mb: 4 }}>
           Effortlessly book sports facilities and manage your reservations.
@@ -161,22 +95,6 @@ export function HomePage() {
           </Card>
         </Grid>
       </Container>
-
-      <Box
-        component="footer"
-        sx={{
-          bgcolor: "primary.main",
-          color: "white",
-          p: 2,
-          mt: 4,
-          textAlign: "center",
-        }}
-      >
-        <Typography variant="body2">
-          © {new Date().getFullYear()} Markas Klimovas IFF-1/2
-        </Typography>
-      </Box>
-
       <Modal open={isModalOpen} onClose={handleModalClose}>
         <Box sx={modalStyle}>
           <Typography variant="h6" component="h2">
@@ -196,6 +114,6 @@ export function HomePage() {
           </Button>
         </Box>
       </Modal>
-    </ThemeProvider>
+    </Box>
   );
 }

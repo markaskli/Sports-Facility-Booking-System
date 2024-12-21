@@ -16,6 +16,10 @@ import { Route as RegisterIndexImport } from './routes/register/index'
 import { Route as LoginIndexImport } from './routes/login/index'
 import { Route as FacilitiesIndexImport } from './routes/facilities/index'
 import { Route as FacilitiesFacilityIdImport } from './routes/facilities/$facilityId'
+import { Route as FacilitiesFacilityIdTimeSlotsIndexImport } from './routes/facilities_.$facilityId/timeSlots/index'
+import { Route as FacilitiesFacilityIdTimeSlotsTimeSlotIdImport } from './routes/facilities_.$facilityId/timeSlots/$timeSlotId'
+import { Route as FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexImport } from './routes/facilities_.$facilityId/timeSlots_.$timeSlotId/reservations/index'
+import { Route as FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdImport } from './routes/facilities_.$facilityId/timeSlots_.$timeSlotId/reservations/$reservationId'
 
 // Create/Update Routes
 
@@ -48,6 +52,36 @@ const FacilitiesFacilityIdRoute = FacilitiesFacilityIdImport.update({
   path: '/facilities/$facilityId',
   getParentRoute: () => rootRoute,
 } as any)
+
+const FacilitiesFacilityIdTimeSlotsIndexRoute =
+  FacilitiesFacilityIdTimeSlotsIndexImport.update({
+    id: '/facilities_/$facilityId/timeSlots/',
+    path: '/facilities/$facilityId/timeSlots/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const FacilitiesFacilityIdTimeSlotsTimeSlotIdRoute =
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdImport.update({
+    id: '/facilities_/$facilityId/timeSlots/$timeSlotId',
+    path: '/facilities/$facilityId/timeSlots/$timeSlotId',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexRoute =
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexImport.update({
+    id: '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/',
+    path: '/facilities/$facilityId/timeSlots/$timeSlotId/reservations/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdRoute =
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdImport.update(
+    {
+      id: '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/$reservationId',
+      path: '/facilities/$facilityId/timeSlots/$timeSlotId/reservations/$reservationId',
+      getParentRoute: () => rootRoute,
+    } as any,
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -88,6 +122,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterIndexImport
       parentRoute: typeof rootRoute
     }
+    '/facilities_/$facilityId/timeSlots/$timeSlotId': {
+      id: '/facilities_/$facilityId/timeSlots/$timeSlotId'
+      path: '/facilities/$facilityId/timeSlots/$timeSlotId'
+      fullPath: '/facilities/$facilityId/timeSlots/$timeSlotId'
+      preLoaderRoute: typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/facilities_/$facilityId/timeSlots/': {
+      id: '/facilities_/$facilityId/timeSlots/'
+      path: '/facilities/$facilityId/timeSlots'
+      fullPath: '/facilities/$facilityId/timeSlots'
+      preLoaderRoute: typeof FacilitiesFacilityIdTimeSlotsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/$reservationId': {
+      id: '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/$reservationId'
+      path: '/facilities/$facilityId/timeSlots/$timeSlotId/reservations/$reservationId'
+      fullPath: '/facilities/$facilityId/timeSlots/$timeSlotId/reservations/$reservationId'
+      preLoaderRoute: typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/': {
+      id: '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/'
+      path: '/facilities/$facilityId/timeSlots/$timeSlotId/reservations'
+      fullPath: '/facilities/$facilityId/timeSlots/$timeSlotId/reservations'
+      preLoaderRoute: typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -99,6 +161,10 @@ export interface FileRoutesByFullPath {
   '/facilities': typeof FacilitiesIndexRoute
   '/login': typeof LoginIndexRoute
   '/register': typeof RegisterIndexRoute
+  '/facilities/$facilityId/timeSlots/$timeSlotId': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdRoute
+  '/facilities/$facilityId/timeSlots': typeof FacilitiesFacilityIdTimeSlotsIndexRoute
+  '/facilities/$facilityId/timeSlots/$timeSlotId/reservations/$reservationId': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdRoute
+  '/facilities/$facilityId/timeSlots/$timeSlotId/reservations': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -107,6 +173,10 @@ export interface FileRoutesByTo {
   '/facilities': typeof FacilitiesIndexRoute
   '/login': typeof LoginIndexRoute
   '/register': typeof RegisterIndexRoute
+  '/facilities/$facilityId/timeSlots/$timeSlotId': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdRoute
+  '/facilities/$facilityId/timeSlots': typeof FacilitiesFacilityIdTimeSlotsIndexRoute
+  '/facilities/$facilityId/timeSlots/$timeSlotId/reservations/$reservationId': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdRoute
+  '/facilities/$facilityId/timeSlots/$timeSlotId/reservations': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexRoute
 }
 
 export interface FileRoutesById {
@@ -116,6 +186,10 @@ export interface FileRoutesById {
   '/facilities/': typeof FacilitiesIndexRoute
   '/login/': typeof LoginIndexRoute
   '/register/': typeof RegisterIndexRoute
+  '/facilities_/$facilityId/timeSlots/$timeSlotId': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdRoute
+  '/facilities_/$facilityId/timeSlots/': typeof FacilitiesFacilityIdTimeSlotsIndexRoute
+  '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/$reservationId': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdRoute
+  '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/': typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -126,8 +200,21 @@ export interface FileRouteTypes {
     | '/facilities'
     | '/login'
     | '/register'
+    | '/facilities/$facilityId/timeSlots/$timeSlotId'
+    | '/facilities/$facilityId/timeSlots'
+    | '/facilities/$facilityId/timeSlots/$timeSlotId/reservations/$reservationId'
+    | '/facilities/$facilityId/timeSlots/$timeSlotId/reservations'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/facilities/$facilityId' | '/facilities' | '/login' | '/register'
+  to:
+    | '/'
+    | '/facilities/$facilityId'
+    | '/facilities'
+    | '/login'
+    | '/register'
+    | '/facilities/$facilityId/timeSlots/$timeSlotId'
+    | '/facilities/$facilityId/timeSlots'
+    | '/facilities/$facilityId/timeSlots/$timeSlotId/reservations/$reservationId'
+    | '/facilities/$facilityId/timeSlots/$timeSlotId/reservations'
   id:
     | '__root__'
     | '/'
@@ -135,6 +222,10 @@ export interface FileRouteTypes {
     | '/facilities/'
     | '/login/'
     | '/register/'
+    | '/facilities_/$facilityId/timeSlots/$timeSlotId'
+    | '/facilities_/$facilityId/timeSlots/'
+    | '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/$reservationId'
+    | '/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/'
   fileRoutesById: FileRoutesById
 }
 
@@ -144,6 +235,10 @@ export interface RootRouteChildren {
   FacilitiesIndexRoute: typeof FacilitiesIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   RegisterIndexRoute: typeof RegisterIndexRoute
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdRoute: typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdRoute
+  FacilitiesFacilityIdTimeSlotsIndexRoute: typeof FacilitiesFacilityIdTimeSlotsIndexRoute
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdRoute: typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdRoute
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexRoute: typeof FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -152,6 +247,14 @@ const rootRouteChildren: RootRouteChildren = {
   FacilitiesIndexRoute: FacilitiesIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   RegisterIndexRoute: RegisterIndexRoute,
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdRoute:
+    FacilitiesFacilityIdTimeSlotsTimeSlotIdRoute,
+  FacilitiesFacilityIdTimeSlotsIndexRoute:
+    FacilitiesFacilityIdTimeSlotsIndexRoute,
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdRoute:
+    FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsReservationIdRoute,
+  FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexRoute:
+    FacilitiesFacilityIdTimeSlotsTimeSlotIdReservationsIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -168,7 +271,11 @@ export const routeTree = rootRoute
         "/facilities/$facilityId",
         "/facilities/",
         "/login/",
-        "/register/"
+        "/register/",
+        "/facilities_/$facilityId/timeSlots/$timeSlotId",
+        "/facilities_/$facilityId/timeSlots/",
+        "/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/$reservationId",
+        "/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/"
       ]
     },
     "/": {
@@ -185,6 +292,18 @@ export const routeTree = rootRoute
     },
     "/register/": {
       "filePath": "register/index.tsx"
+    },
+    "/facilities_/$facilityId/timeSlots/$timeSlotId": {
+      "filePath": "facilities_.$facilityId/timeSlots/$timeSlotId.tsx"
+    },
+    "/facilities_/$facilityId/timeSlots/": {
+      "filePath": "facilities_.$facilityId/timeSlots/index.tsx"
+    },
+    "/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/$reservationId": {
+      "filePath": "facilities_.$facilityId/timeSlots_.$timeSlotId/reservations/$reservationId.tsx"
+    },
+    "/facilities_/$facilityId/timeSlots_/$timeSlotId/reservations/": {
+      "filePath": "facilities_.$facilityId/timeSlots_.$timeSlotId/reservations/index.tsx"
     }
   }
 }

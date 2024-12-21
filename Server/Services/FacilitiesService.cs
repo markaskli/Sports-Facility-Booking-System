@@ -53,17 +53,9 @@ namespace Server.Services
         {
             var facilities = await _context.Facilities
                 .AsNoTracking()
-                .Include(f => f.TimeSlots)
-                .ThenInclude(ts => ts.Reservations)
-                .ThenInclude(r => r.User)
                 .ToListAsync();
 
-            if (facilities.Count == 0)
-            {
-                return null;
-            }
-
-            return facilities.Select(ToContract).ToList();
+            return facilities.Count > 0 ? facilities.Select(ToContract).ToList() : null;
         }
 
         public async Task<FacilityDto> CreateAsync(string userId, CreateFacilityDto request)
