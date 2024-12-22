@@ -1,12 +1,12 @@
 import axiosInstance from "../axiosInstance";
-import { CreateFacilityDto, UpdateFacilityDto } from "../models/facility";
+import { CreateFacilityDto, FacilityDto, UpdateFacilityDto } from "../models/facility";
 
 export const fetchFacilities = async () => {
   const { data } = await axiosInstance.get("/facility");
   return data;
 };
 
-export const fetchFacilityById = async (id: number) => {
+export const fetchFacilityById = async (id: number) : Promise<FacilityDto> => {
   const { data } = await axiosInstance.get(`/facility/${id}`);
   return data;
 };

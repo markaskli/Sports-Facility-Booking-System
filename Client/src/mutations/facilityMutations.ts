@@ -14,7 +14,7 @@ export const getFacilitiesQuery = () => {
   return useQuery({
     queryKey: [ENTITY_KEY],
     queryFn: fetchFacilities,
-    initialData: []
+    retry: 2
   });
 };
 

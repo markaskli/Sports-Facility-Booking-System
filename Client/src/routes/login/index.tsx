@@ -33,9 +33,10 @@ export function LoginComponent() {
     try {
       const responseData = await LoginUser(data);
       setUser({
+        id: responseData.id,
         userName: responseData.userName,
         email: responseData.email,
-        role: "temp",
+        roles: responseData.roles,
       });
       navigate({ to: "/" });
     } catch (error) {

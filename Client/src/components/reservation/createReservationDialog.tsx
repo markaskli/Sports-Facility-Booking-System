@@ -12,6 +12,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
+import { useCreateReservationMutation } from "../../mutations/reservationMutations";
 
 interface ReservationFormData {
   reservationDate: Dayjs;
@@ -20,7 +21,11 @@ interface ReservationFormData {
 
 interface ReservationDialogProps {
   open: boolean;
+  facilityId: number;
+  timeSlotId: number;
   onClose: () => void;
+  setSnackBarMessage: (input: string) => void;
+  setDisplayOfSnackBarMessage: (value: boolean) => void;
 }
 
 // Validation Schema using Zod
@@ -28,35 +33,72 @@ const reservationSchema = z.object({
   reservationDate: z.instanceof(dayjs as unknown as typeof Dayjs, {
     message: "End Time is required.",
   }),
-  numberOfParticipants: z
+  numberOfParticipants: z.coerce
     .number()
     .min(1, { message: "Number of participants must be at least 1" })
     .or(z.literal(""))
+    .transform((value) => (value === "" ? null : value))
     .optional(),
 });
 
-const CreateReservationDialog = ({ open, onClose }: ReservationDialogProps) => {
+const CreateReservationDialog = ({
+  open,
+  facilityId,
+  timeSlotId,
+  onClose,
+  setSnackBarMessage,
+  setDisplayOfSnackBarMessage,
+}: ReservationDialogProps) => {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ReservationFormData>({
     resolver: zodResolver(reservationSchema),
   });
 
+  const createMutation = useCreateReservationMutation(timeSlotId);
+
   const onSubmit = (data: ReservationFormData) => {
-    console.log("Reservation Data:", data);
+    createMutation.mutate(
+      {
+        facilityId,
+        createDto: {
+          reservationDate: dayjs(data.reservationDate)
+            .tz("Europe/Vilnius")
+            .format(),
+          numberOfParticipants: data.numberOfParticipants,
+        },
+      },
+      {
+        onSuccess: () => {
+          setSnackBarMessage("Reservation created successfully!");
+          setDisplayOfSnackBarMessage(true);
+          reset();
+          onClose();
+        },
+        onError: (error: any) => {
+          setSnackBarMessage(
+            error.response?.data?.message ||
+              "Failed to create Reservation. Please try again."
+          );
+          setDisplayOfSnackBarMessage(true);
+        },
+      }
+    );
+  };
+
+  const handleClose = () => {
+    reset();
+    onClose();
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Add Reservation</DialogTitle>
       <DialogContent>
-        <Box
-          component="form"
-          onSubmit={handleSubmit(onSubmit)}
-          sx={{ width: 400 }}
-        >
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} padding={1}>
           {/* Reservation Date */}
           <Box mb={2}>
             <Controller
@@ -66,6 +108,7 @@ const CreateReservationDialog = ({ open, onClose }: ReservationDialogProps) => {
                 <DatePicker
                   {...field}
                   value={field.value || null}
+                  timezone="Europe/Vilnius"
                   label="Reservation Date"
                   onChange={(newValue) => field.onChange(newValue)}
                   slotProps={{ textField: { fullWidth: true } }}
@@ -103,7 +146,7 @@ const CreateReservationDialog = ({ open, onClose }: ReservationDialogProps) => {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={handleClose} color="secondary">
           Cancel
         </Button>
         <Button

@@ -6,8 +6,7 @@ import {
   fetchTimeSlots,
   updateTimeSlot,
 } from "../queries/timeSlotQueries";
-import { CreateTimeSlotDto } from "../models/timeSlot";
-import { UpdateFacilityDto } from "../models/facility";
+import { CreateTimeSlotDto, UpdateTimeSlotDto } from "../models/timeSlot";
 
 const ENTITY_KEY = "time-slots";
 
@@ -19,57 +18,52 @@ export const getTimeSlotsQuery = (facilityId: number) => {
   });
 };
 
-export const getFacilityByIdQuery = (facilityId: number, id: number) => {
+export const getTimeSlotByIdQuery = (facilityId: number, id: number) => {
   return useQuery({
     queryKey: [ENTITY_KEY, id],
     queryFn: () => fetchTimeSlotById(facilityId, id),
   });
 };
 
-export const useCreateTimeSlotMutation = () => {
+export const useCreateTimeSlotMutation = (facilityId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      facilityId,
-      createDto,
-    }: {
-      facilityId: number;
-      createDto: CreateTimeSlotDto;
-    }) => createTimeSlot(facilityId, createDto),
+    mutationFn: ({ createDto }: { createDto: CreateTimeSlotDto }) =>
+      createTimeSlot(facilityId, createDto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ENTITY_KEY] });
+      queryClient.invalidateQueries({ queryKey: ["facilities", facilityId] });
     },
   });
 };
 
-export const useUpdateTimeSlotMutation = () => {
+export const useUpdateTimeSlotMutation = (id: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
       facilityId,
-      id,
       payload,
     }: {
       facilityId: number;
-      id: number;
-      payload: UpdateFacilityDto;
+      payload: UpdateTimeSlotDto;
     }) => updateTimeSlot(facilityId, id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ENTITY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [ENTITY_KEY, id] });
     },
   });
 };
 
-export const useDeleteTimeSlotMutation = () => {
+export const useDeleteTimeSlotMutation = (facilityId: number, id: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ facilityId, id }: { facilityId: number; id: number }) =>
-      deleteTimeSlot(facilityId, id),
+    mutationFn: () => deleteTimeSlot(facilityId, id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [ENTITY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [ENTITY_KEY, id] });
+      queryClient.invalidateQueries({ queryKey: ["facilities", facilityId] });
     },
   });
 };

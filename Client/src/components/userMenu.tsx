@@ -27,11 +27,21 @@ const UserMenu = () => {
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
-            <MenuItem disabled>
-              <Typography variant="body2" color="text.secondary">
-                {user.role ?? "Member"}
-              </Typography>
-            </MenuItem>
+            {user.roles?.length > 0 ? (
+              user.roles.map((role) => (
+                <MenuItem disabled key={role}>
+                  <Typography variant="body2" color="text.secondary">
+                    {role}
+                  </Typography>
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem disabled>
+                <Typography variant="body2" color="text.secondary">
+                  {"Member"}
+                </Typography>
+              </MenuItem>
+            )}
 
             <Divider />
 

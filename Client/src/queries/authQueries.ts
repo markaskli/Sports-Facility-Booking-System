@@ -6,11 +6,14 @@ export const LoginUser = async (
 ): Promise<LoginResponseDto> => {
   const { data } = await axiosInstance.post("/Authentication/login", request);
 
-  const { accessToken, userName, email } = data;
+  const { accessToken, userName, email, id, roles } = data;
 
   if (accessToken) {
     localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("user", JSON.stringify({ userName, email }));
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ userName, email, roles, id })
+    );
   }
 
   return data;

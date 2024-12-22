@@ -2,9 +2,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { LogoutUser } from "../queries/authQueries";
 
 interface User {
+  id: string
   userName: string;
   email: string;
-  role: string;
+  roles: string[];
 }
 
 interface UserContextType {

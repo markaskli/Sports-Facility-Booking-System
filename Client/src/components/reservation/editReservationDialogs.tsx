@@ -13,16 +13,18 @@ import dayjs, { Dayjs } from "dayjs";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { ReservationDto } from "../../models/reservation";
+import { useUpdateReservationMutation } from "../../mutations/reservationMutations";
 
 const reservationSchema = z.object({
   reservationDate: z.instanceof(dayjs as unknown as typeof Dayjs, {
     message: "End Time is required.",
   }),
-  numberOfParticipants: z
+  numberOfParticipants: z.coerce
     .number()
     .min(1, { message: "Number of participants must be at least 1" })
     .or(z.literal(""))
-    .nullable(),
+    .transform((value) => (value === "" ? null : value))
+    .optional(),
 });
 
 // TypeScript Interface
@@ -30,14 +32,20 @@ interface ReservationFormData extends z.infer<typeof reservationSchema> {}
 
 interface EditReservationDialogProps {
   open: boolean;
-  onClose: () => void;
   reservationData: ReservationDto;
+  facilityId: number;
+  onClose: () => void;
+  setSnackBarMessage: (input: string) => void;
+  setDisplayOfSnackBarMessage: (value: boolean) => void;
 }
 
 const EditReservationDialog = ({
   open,
-  onClose,
   reservationData,
+  facilityId,
+  onClose,
+  setSnackBarMessage,
+  setDisplayOfSnackBarMessage,
 }: EditReservationDialogProps) => {
   const {
     control,
@@ -47,10 +55,17 @@ const EditReservationDialog = ({
   } = useForm<ReservationFormData>({
     resolver: zodResolver(reservationSchema),
     defaultValues: {
-      reservationDate: dayjs(reservationData.reservationDate),
-      numberOfParticipants: reservationData.numberOfParticipants,
+      reservationDate: dayjs(reservationData.reservationDate).tz(
+        "Europe/Vilnius"
+      ),
+      numberOfParticipants: reservationData.numberOfParticipants ?? undefined,
     },
   });
+
+  const updateMutation = useUpdateReservationMutation(
+    reservationData.id,
+    reservationData.timeSlotId
+  );
 
   const handleClose = () => {
     reset(); // Reset form state when dialog closes
@@ -58,7 +73,30 @@ const EditReservationDialog = ({
   };
 
   const submitHandler = (data: ReservationFormData) => {
-    console.log(data.reservationDate.toDate(), data.numberOfParticipants, "submitted");
+    updateMutation.mutate(
+      {
+        facilityId,
+        payload: {
+          reservationDate: data.reservationDate.format(),
+          numberOfParticipants: data.numberOfParticipants,
+        },
+      },
+      {
+        onSuccess: () => {
+          setSnackBarMessage("Reservation updated successfully!");
+          setDisplayOfSnackBarMessage(true);
+          reset();
+          onClose();
+        },
+        onError: (error: any) => {
+          setSnackBarMessage(
+            error.response?.data?.message ||
+              "Failed to update Reservation. Please try again."
+          );
+          setDisplayOfSnackBarMessage(true);
+        },
+      }
+    );
     handleClose();
   };
 
@@ -76,7 +114,8 @@ const EditReservationDialog = ({
                 render={({ field }) => (
                   <DatePicker
                     {...field}
-                    value={field.value || null}
+                    value={field.value}
+                    timezone="Europe/Vilnius"
                     label="Reservation Date"
                     onChange={(newValue) => field.onChange(newValue)}
                     slotProps={{ textField: { fullWidth: true } }}
@@ -103,7 +142,6 @@ const EditReservationDialog = ({
                     fullWidth
                     margin="normal"
                     error={!!errors.numberOfParticipants}
-                    helperText={errors.numberOfParticipants?.message}
                   />
                 )}
               />

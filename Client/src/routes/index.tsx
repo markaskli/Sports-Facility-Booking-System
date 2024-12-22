@@ -34,9 +34,6 @@ const modalStyle = {
 export function HomePageComponent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
 
@@ -62,37 +59,41 @@ export function HomePageComponent() {
         </Typography>
 
         <Grid container spacing={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h5" component="div">
-                Reserve Facilities
-              </Typography>
-              <Typography variant="body2">
-                Browse and book your favorite sports facilities easily.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" onClick={handleModalOpen}>
-                Learn More
-              </Button>
-            </CardActions>
-          </Card>
+          <Grid size="grow">
+            <Card>
+              <CardContent>
+                <Typography variant="h5" component="div">
+                  Reserve Facilities
+                </Typography>
+                <Typography variant="body2">
+                  Browse and book your favorite sports facilities easily.
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <Button size="small" onClick={handleModalOpen}>
+                  Learn More
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
 
-          <Card>
-            <CardContent>
-              <Typography variant="h5" component="div">
-                Manage Time Slots
-              </Typography>
-              <Typography variant="body2">
-                Ensure optimal scheduling with efficient slot management.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" onClick={handleModalOpen}>
-                Learn More
-              </Button>
-            </CardActions>
-          </Card>
+          <Grid size="grow">
+            <Card>
+              <CardContent>
+                <Typography variant="h5" component="div">
+                  Manage Time Slots
+                </Typography>
+                <Typography variant="body2">
+                  Ensure optimal scheduling with efficient slot management.
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <Button size="small" onClick={handleModalOpen}>
+                  Learn More
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
         </Grid>
       </Container>
       <Modal open={isModalOpen} onClose={handleModalClose}>

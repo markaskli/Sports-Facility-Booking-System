@@ -1,4 +1,5 @@
 import axiosInstance from "../axiosInstance";
+import { TimeSlotDto } from "../models/timeSlot";
 
 export const fetchTimeSlots = async (facilityId: number) => {
   const { data } = await axiosInstance.get(`/facility/${facilityId}/timeslot`);
@@ -8,7 +9,7 @@ export const fetchTimeSlots = async (facilityId: number) => {
 export const fetchTimeSlotById = async (
   facilityId: number,
   timeSlotId: number
-) => {
+) : Promise<TimeSlotDto> => {
   const { data } = await axiosInstance.get(
     `/facility/${facilityId}/timeslot/${timeSlotId}`
   );

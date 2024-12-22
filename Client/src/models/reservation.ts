@@ -11,11 +11,14 @@ export type ReservationDto = {
 
 type BaseReservationDto = {
   reservationDate: Date;
-  numberOfParticipants: number | null;
+  numberOfParticipants?: number | null;
 };
 
-export type CreateReservationDto = BaseReservationDto & {};
-export type UpdateReservationDto = BaseReservationDto & {
-  
+export type CreateReservationDto = {
+  reservationDate: string;
+  numberOfParticipants?: number | null;
 };
-
+export type UpdateReservationDto = {
+  reservationDate: string;
+  numberOfParticipants?: number | null;
+};

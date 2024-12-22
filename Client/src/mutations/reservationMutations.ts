@@ -24,72 +24,68 @@ export const getReservationsQuery = (
   });
 };
 
-export const getFacilityByIdQuery = (
+export const getReservationByIdQuery = (
   facilityId: number,
   timeSlotId: number,
   id: number
 ) => {
   return useQuery({
-    queryKey: [ENTITY_KEY, timeSlotId, id],
+    queryKey: [ENTITY_KEY, id],
     queryFn: () => fetchReservationById(facilityId, timeSlotId, id),
   });
 };
 
-export const useCreateFacilityMutation = () => {
+export const useCreateReservationMutation = (timeSlotId: number) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
       facilityId,
-      timeSlotId,
       createDto,
     }: {
       facilityId: number;
-      timeSlotId: number;
       createDto: CreateReservationDto;
     }) => createReservation(facilityId, timeSlotId, createDto),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ENTITY_KEY] });
+      queryClient.invalidateQueries({ queryKey: ["time-slots", timeSlotId] });
     },
   });
 };
 
-export const useUpdateFacilityMutation = () => {
+export const useUpdateReservationMutation = (
+  id: number,
+  timeSlotId: number
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
       facilityId,
-      timeSlotId,
-      id,
       payload,
     }: {
       facilityId: number;
-      timeSlotId: number;
-      id: number;
       payload: UpdateReservationDto;
     }) => updateReservation(facilityId, timeSlotId, id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [ENTITY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [ENTITY_KEY, id] });
+      queryClient.invalidateQueries({ queryKey: ["time-slots", timeSlotId] });
     },
   });
 };
 
-export const useDeleteFacilityMutation = () => {
+export const useDeleteReservationMutation = (
+  id: number,
+  timeSlotId: number
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      facilityId,
-      timeSlotId,
-      id,
-    }: {
-      facilityId: number;
-      timeSlotId: number;
-      id: number;
-    }) => deleteReservation(facilityId, timeSlotId, id),
+    mutationFn: ({ facilityId }: { facilityId: number }) =>
+      deleteReservation(facilityId, timeSlotId, id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [ENTITY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [ENTITY_KEY, id] });
+      queryClient.invalidateQueries({ queryKey: ["time-slots", timeSlotId] });
     },
   });
 };

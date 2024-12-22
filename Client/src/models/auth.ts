@@ -1,16 +1,18 @@
 export type LoginDto = {
-    userName: string
-    password: string
-}
+  userName: string;
+  password: string;
+};
 
 export type LoginResponseDto = {
-    userName: string,
-    email: string,
-    accessToken: string
-}
+  id: string;
+  userName: string;
+  email: string;
+  accessToken: string;
+  roles: string[];
+};
 
 export type RegisterDto = {
-    userName: string
-    email: string
-    password: string
-}
+  userName: string;
+  email: string;
+  password: string;
+};

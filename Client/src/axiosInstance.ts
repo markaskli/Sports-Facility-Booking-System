@@ -1,6 +1,5 @@
 import axios from "axios";
 import { RefreshToken } from "./queries/authQueries";
-import { useNavigate } from "@tanstack/react-router";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,

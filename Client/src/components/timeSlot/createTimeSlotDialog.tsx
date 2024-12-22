@@ -59,15 +59,14 @@ const CreateTimeSlotDialog = ({
     onClose();
   };
 
-  const createTimeSlotMutation = useCreateTimeSlotMutation();
+  const createTimeSlotMutation = useCreateTimeSlotMutation(facilityId);
 
   const submitHandler = (data: TimeSlotFormData) => {
     createTimeSlotMutation.mutate(
       {
-        facilityId,
         createDto: {
-          startTime: new Date(data.startTime.format("l LT")),
-          endTime: new Date(data.endTime.format("l LT")),
+          startTime: dayjs(data.startTime).tz("Europe/Vilnius").format(),
+          endTime: dayjs(data.endTime).tz("Europe/Vilnius").format(),
         },
       },
       {
@@ -85,6 +84,7 @@ const CreateTimeSlotDialog = ({
         },
       }
     );
+
     handleClose();
   };
 
@@ -110,6 +110,7 @@ const CreateTimeSlotDialog = ({
                       value={field.value || null}
                       onChange={(newValue) => field.onChange(newValue)}
                       ampm={false}
+                      timezone="Europe/Vilnius"
                       label="Start Time"
                       views={["hours", "minutes"]}
                       slotProps={{ textField: { fullWidth: true } }}
@@ -136,6 +137,7 @@ const CreateTimeSlotDialog = ({
                       onChange={(newValue) => field.onChange(newValue)}
                       ampm={false}
                       label="End Time"
+                      timezone="Europe/Vilnius"
                       views={["hours", "minutes"]}
                       slotProps={{ textField: { fullWidth: true } }}
                     />

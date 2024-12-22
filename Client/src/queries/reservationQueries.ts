@@ -1,4 +1,5 @@
 import axiosInstance from "../axiosInstance";
+import { ReservationDto } from "../models/reservation";
 
 export const fetchReservations = async (
   facilityId: number,
@@ -14,7 +15,7 @@ export const fetchReservationById = async (
   facilityId: number,
   timeSlotId: number,
   reservationId: number
-) => {
+): Promise<ReservationDto> => {
   const { data } = await axiosInstance.get(
     `/facility/${facilityId}/timeslot/${timeSlotId}/reservation/${reservationId}`
   );

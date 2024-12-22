@@ -22,18 +22,16 @@ const ReservationCard = ({ reservation }: TimeSlotCardProps) => {
         Date: {new Date(reservation.reservationDate).toLocaleDateString()}
       </Typography>
       <Typography variant="body2">
-        Participants: {reservation.numberOfParticipants}
+        Participants: {reservation.numberOfParticipants ?? "Not Specified"}
       </Typography>
-      <CardActionArea>
-        <Button
-          variant="text"
-          component={Link}
-          to={`reservations/${reservation.id}`}
-          sx={{ mt: 1 }}
-        >
-          View Details
-        </Button>
-      </CardActionArea>
+      <Button
+        variant="text"
+        component={Link}
+        to={`reservations/${reservation.id}`}
+        sx={{ mt: 1 }}
+      >
+        View Details
+      </Button>
     </Card>
   );
 };

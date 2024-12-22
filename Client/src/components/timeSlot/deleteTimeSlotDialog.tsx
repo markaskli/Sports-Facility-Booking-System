@@ -5,20 +5,46 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
+import { useDeleteTimeSlotMutation } from "../../mutations/timeSlotMutations";
+import { useNavigate } from "@tanstack/react-router";
 
 interface DeleteTimeSlotDialogProps {
   open: boolean;
+  facilityId: number;
+  timeSlotId: number;
   onClose: () => void;
-  facilityId: number,
-  timeSlotId: number
+  setSnackBarMessage: (input: string) => void;
+  setDisplayOfSnackBarMessage: (value: boolean) => void;
 }
 
-const DeleteTimeSlotDialog = ({ open, onClose }: DeleteTimeSlotDialogProps) => {
+const DeleteTimeSlotDialog = ({
+  open,
+  facilityId,
+  timeSlotId,
+  onClose,
+  setSnackBarMessage,
+  setDisplayOfSnackBarMessage,
+}: DeleteTimeSlotDialogProps) => {
+  const navigate = useNavigate();
+  const deleteMutation = useDeleteTimeSlotMutation(facilityId, timeSlotId);
+
   const handleClose = () => {
     onClose();
   };
 
   const handleDelete = () => {
+    deleteMutation.mutate(undefined, {
+      onSuccess: () => {
+        navigate({ to: `/facilities/${facilityId}` });
+      },
+      onError: (error: any) => {
+        setSnackBarMessage(
+          error.response?.data?.message ||
+            "Failed to delete time slot. Please try again."
+        );
+        setDisplayOfSnackBarMessage(true);
+      },
+    });
     onClose();
   };
 

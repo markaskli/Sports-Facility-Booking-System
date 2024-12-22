@@ -23,6 +23,8 @@ const facilitySchema = z.object({
   maxNumberOfParticipants: z.coerce
     .number()
     .min(1, "Must be at least 1")
+    .or(z.literal(""))
+    .transform((value) => (value === "" ? null : value))
     .optional(),
   facilityTypeId: z.number().min(1, "Facility type is required"),
 });
@@ -66,7 +68,7 @@ const EditFacilityDialog = (props: FacilityEditDialogProps) => {
       pictureUrl: data.pictureUrl,
       phoneNumber: data.phoneNumber,
       emailAddress: data.emailAddress,
-      maxNumberOfParticipants: data.maxNumberOfParticipants,
+      maxNumberOfParticipants: data.maxNumberOfParticipants ?? undefined,
       facilityTypeId: 1,
     },
   });
