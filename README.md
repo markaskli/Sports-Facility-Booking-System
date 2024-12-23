@@ -234,6 +234,33 @@ Logs out the user.
 
 **Responses:**
 - `200 OK`: Facility details.
+```json
+{
+  "id": 1,
+  "name": "Sporto klubas",
+  "address": "Kauno g. 67, Kaunas",
+  "description": "Sporto klubas jūsų tikslams įvykdyti.",
+  "pictureUrl": "https://shorturl.at/...",
+  "phoneNumber": "37064444444",
+  "emailAddress": "sveikata@klubas.com",
+  "maxNumberOfParticipants": 1,
+  "facilityTypeId": 1,
+  "facilityType": "Gym",
+  "timeSlots": [
+    {
+      "id": 101,
+      "startTime": "2024-01-01T10:00:00Z",
+      "endTime": "2024-01-01T11:00:00Z"
+    },
+    {
+      "id": 102,
+      "startTime": "2024-01-01T12:00:00Z",
+      "endTime": "2024-01-01T13:00:00Z"
+    }
+  ],
+  "createdById": "user123"
+}
+```
 - `404 Not Found`: Facility not found.
 
 ---
@@ -331,6 +358,25 @@ Logs out the user.
 
 **Responses:**
 - `200 OK`: Time slot details.
+  ```json
+  {
+    "id": 101,
+    "startTime": "2024-01-01T10:00:00Z",
+    "endTime": "2024-01-01T11:00:00Z",
+    "facilityId": 1,
+    "createdById": "user123",
+    "reservations": [
+      {
+        "id": 1,
+        "userId": "user123",
+        "userName": "John Doe",
+        "userEmail": "johndoe@example.com",
+        "reservationStatus": "Confirmed",
+        "timeSlotId": 101
+      }
+    ]
+  }
+  ```
 - `404 Not Found`: Time slot not found.
 
 ---
@@ -423,6 +469,16 @@ Logs out the user.
 
 **Responses:**
 - `200 OK`: Reservation details.
+  ```json
+  {
+    "id": 1,
+    "userId": "user123",
+    "userName": "John Doe",
+    "userEmail": "johndoe@example.com",
+    "reservationStatus": "Confirmed",
+    "timeSlotId": 101
+  }
+  ```
 - `404 Not Found`: Reservation not found.
 
 ---
