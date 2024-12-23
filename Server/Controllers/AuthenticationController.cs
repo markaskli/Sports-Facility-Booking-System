@@ -87,9 +87,11 @@ namespace Server.Controllers
 
             return Ok(new LoginResponseDto()
             {
+                Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email!,
                 AccessToken = accessToken,
+                Roles = roles
             });
         }
 

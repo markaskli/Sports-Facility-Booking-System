@@ -13,8 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
         .AddSwaggerGen();
 }
 
+
 var app = builder.Build();
 app.UseExceptionHandler();
+
+app.UseCors(opt => {
+    opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:5173");
+    opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("https://ashy-moss-0d5033503-preview.westeurope.4.azurestaticapps.net");
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -29,8 +35,18 @@ app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbSeeder = scope.ServiceProvider.GetRequiredService<DbInitialization>();
-    await dbSeeder.SeedAuth();
+    try
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ReservationDbContext>();
+        context.Database.Migrate();
+
+        var dbSeeder = scope.ServiceProvider.GetRequiredService<DbInitialization>();
+        await dbSeeder.SeedAuth();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"An error occurred while initializing the database: {ex.Message}");
+    }
 }
 
 app.MapControllers();

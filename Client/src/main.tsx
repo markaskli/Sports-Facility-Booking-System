@@ -1,10 +1,59 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { routeTree } from "./routeTree.gen";
+import { ThemeProvider } from "@emotion/react";
+import { createTheme, CssBaseline } from "@mui/material";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { UserProvider } from "./contexts/userContext";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import "dayjs/locale/lt";
 
-createRoot(document.getElementById('root')!).render(
+const router = createRouter({ routeTree });
+const queryClient = new QueryClient();
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Europe/Vilnius");
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#1E88E5",
+    },
+    secondary: {
+      main: "#FFC107",
+    },
+  },
+  typography: {
+    fontFamily: "Roboto, Arial, sans-serif",
+  },
+});
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <ThemeProvider theme={theme}>
+      <QueryClientProvider client={queryClient}>
+        <UserProvider>
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="lt">
+            <CssBaseline />
+            <RouterProvider router={router} />
+          </LocalizationProvider>
+        </UserProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ThemeProvider>
+  </StrictMode>
+);

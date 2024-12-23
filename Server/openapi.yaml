@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:5208
+  - url: http://localhost:5208/api/v1
 
 paths:
   /facility:
@@ -165,7 +165,7 @@ paths:
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
 
-  /api/v1/facility/{facilityId}/timeSlot/{id}:
+  /facility/{facilityId}/timeSlot/{id}:
     parameters:
       - name: facilityId
         in: path
@@ -326,6 +326,84 @@ paths:
           description: Reservation deleted successfully
         "404":
           $ref: "#/components/responses/NotFound"
+  
+  /authentication/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserDto"
+          text/json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserDto"
+          application/*+json:
+            schema:
+              $ref: "#/components/schemas/RegisterUserDto"
+      responses:
+        "201":
+          description: User registered successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /authentication/login:
+    post:
+      summary: Log in a user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginUserDto"
+      responses:
+        "200":
+          description: Login successful, appends refresh token to user's cookies
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponseDto"
+        "401":
+          description: Unauthorized
+
+  /authentication/accessToken:
+    post:
+      summary: Refresh authentication tokens
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"        
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /authentication/logout:
+    post:
+      summary: Logouts user
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: User logged out successfully
+        "400":
+          $ref: "#/components/responses/BadRequest" 
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+
 
 components:
   schemas:
@@ -449,9 +527,6 @@ components:
     CreateReservationDto:
       type: object
       properties:
-        userId:
-          type: string
-          nullable: false
         reservationDate:
           type: string
           format: date-time
@@ -460,7 +535,6 @@ components:
           type: integer
       required:
         - reservationDate
-        - userId
     UpdateReservationDto:
       type: object
       properties:
@@ -505,6 +579,52 @@ components:
       required:
         - startTime
         - endTime
+    RegisterUserDto:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+      required:
+        - username
+        - email
+        - password
+    LoginUserDto:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+      required:
+        - email
+        - password
+    LoginResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        userName: 
+          type: string      
+        email:
+          type: string
+          format: email
+        accessToken:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+
     UpdateTimeSlotDto:
       type: object
       properties:
