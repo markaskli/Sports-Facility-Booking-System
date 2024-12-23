@@ -527,9 +527,6 @@ components:
     CreateReservationDto:
       type: object
       properties:
-        userId:
-          type: string
-          nullable: false
         reservationDate:
           type: string
           format: date-time
@@ -538,7 +535,6 @@ components:
           type: integer
       required:
         - reservationDate
-        - userId
     UpdateReservationDto:
       type: object
       properties:
