@@ -7,10 +7,8 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
-  useTheme,
-  useMediaQuery,
 } from "@mui/material";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import Grid from "@mui/material/Grid2";
 import TimeSlotCard from "../../components/timeSlot/timeSlotCard";
 import EditFacilityDialog from "../../components/facility/editFacilityDialog";
@@ -38,9 +36,6 @@ function FacilityDetailsComponent() {
 
   const { user } = useUser();
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const handleOpenEditDialog = () => setEditDialogOpen(true);
   const handleCloseEditDialog = () => setEditDialogOpen(false);
 
@@ -65,6 +60,23 @@ function FacilityDetailsComponent() {
             Loading facility information...
           </Typography>
           <CircularProgress />
+        </Box>
+      ) : error || !data ? (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "50vh",
+          }}
+        >
+          <Typography variant="body1" textAlign="center" sx={{ mb: 4 }}>
+            Facility information could not be loaded.
+          </Typography>
+          <Button variant="contained" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
         </Box>
       ) : (
         <Container>
@@ -154,8 +166,7 @@ function FacilityDetailsComponent() {
                         justifyContent={"space-between"}
                         sx={{ gap: { xs: 2, sm: 0 } }}
                       >
-                        {" "}
-                        {/* Center buttons */}
+                        {/* Edit and Delete Buttons */}
                         <Button
                           variant="outlined"
                           color="warning"
@@ -288,6 +299,7 @@ function FacilityDetailsComponent() {
           />
         </Container>
       )}
+      {/* Snackbar */}
       <Snackbar
         open={isSnackbarOpen}
         autoHideDuration={2500}

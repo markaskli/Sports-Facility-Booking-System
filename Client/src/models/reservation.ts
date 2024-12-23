@@ -9,10 +9,10 @@ export type ReservationDto = {
   numberOfParticipants: number | null;
 };
 
-type BaseReservationDto = {
-  reservationDate: Date;
-  numberOfParticipants?: number | null;
-};
+// type BaseReservationDto = {
+//   reservationDate: Date;
+//   numberOfParticipants?: number | null;
+// };
 
 export type CreateReservationDto = {
   reservationDate: string;

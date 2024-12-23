@@ -1,9 +1,9 @@
 import { ReservationDto } from "./reservation";
 
-type BaseTimeSlotDto = {
-  startTime: Date;
-  endTime: Date;
-};
+// type BaseTimeSlotDto = {
+//   startTime: Date;
+//   endTime: Date;
+// };
 
 export type TimeSlotDto = {
   id: number;

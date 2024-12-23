@@ -61,6 +61,19 @@ function TimeSlotDetails() {
           </Typography>
           <CircularProgress />
         </Box>
+      ) : error || !data ? (
+        // Handle error or if data is undefined/null
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          minHeight="50vh"
+        >
+          <Typography variant="body1" textAlign="center" sx={{ mb: 4 }}>
+            Time slot information not found.
+          </Typography>
+        </Box>
       ) : (
         <>
           <Card sx={{ mb: 4 }}>
@@ -96,7 +109,13 @@ function TimeSlotDetails() {
                   variant="h5"
                   textAlign={{ xs: "center", sm: "left" }}
                 >
-                  {formatTime(data.startTime)} - {formatTime(data.endTime)}
+                  {data?.startTime
+                    ? formatTime(data.startTime)
+                    : "Start time unavailable"}{" "}
+                  -
+                  {data?.endTime
+                    ? formatTime(data.endTime)
+                    : "End time unavailable"}
                 </Typography>
                 {data?.createdById === user?.id ||
                 user?.roles.some((role) => role === "SystemAdministrator") ? (
@@ -124,7 +143,7 @@ function TimeSlotDetails() {
               {/* Reservations Section */}
               <Box display={"flex"} justifyContent={"space-between"} mb={2}>
                 <Typography variant="h6" gutterBottom>
-                  Reservations ({data.reservations?.length || 0})
+                  Reservations ({data?.reservations?.length || 0})
                 </Typography>
                 <Button
                   variant="outlined"
@@ -133,7 +152,7 @@ function TimeSlotDetails() {
                   Add reservation
                 </Button>
               </Box>
-              {data.reservations?.length > 0 ? (
+              {data?.reservations?.length > 0 ? (
                 <Grid container spacing={2}>
                   {data.reservations.map((reservation: ReservationDto) => (
                     <Grid size={{ xs: 12, sm: 6, md: 4 }} key={reservation.id}>
@@ -157,8 +176,8 @@ function TimeSlotDetails() {
             setSnackBarMessage={(message) => setSnackBarMessage(message)}
             setDisplayOfSnackBarMessage={(status) => setSnackBarOpen(status)}
             timeSlotData={{
-              startTime: data.startTime,
-              endTime: data.endTime,
+              startTime: data?.startTime,
+              endTime: data?.endTime,
             }}
             timeSlotId={Number(timeSlotId)}
             facilityId={Number(facilityId)}

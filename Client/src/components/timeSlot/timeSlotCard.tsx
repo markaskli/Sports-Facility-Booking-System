@@ -1,18 +1,12 @@
 import {
-  Box,
   Button,
   Card,
   CardContent,
-  Chip,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
   Typography,
 } from "@mui/material";
 import { TimeSlotDto } from "../../models/timeSlot";
 import { formatTime, formatToDateOnly } from "../utils/dateUtils";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 interface TimeSlotCardProps {
   timeSlot: TimeSlotDto;

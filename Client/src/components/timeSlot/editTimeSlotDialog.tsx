@@ -31,7 +31,10 @@ interface TimeSlotFormData extends z.infer<typeof timeSlotSchema> {}
 
 interface EditTimeSlotDialogProps {
   open: boolean;
-  timeSlotData: TimeSlotFormData;
+  timeSlotData: {
+    startTime: string,
+    endTime: string
+  };
   timeSlotId: number;
   facilityId: number;
   onClose: () => void;

@@ -1,4 +1,4 @@
-import { Card, Typography, Button, CardActionArea } from "@mui/material";
+import { Card, Typography, Button } from "@mui/material";
 import { Link } from "@tanstack/react-router";
 import { ReservationDto } from "../../models/reservation";
 

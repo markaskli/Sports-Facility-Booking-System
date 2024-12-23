@@ -9,15 +9,13 @@ import {
   CardActionArea,
   CircularProgress,
   Snackbar,
-  Fade,
-  Slide,
   Alert,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
 import { createFileRoute, Link } from "@tanstack/react-router";
 import CreateFacilityDialog from "../../components/facility/createFacilityDialog";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getFacilitiesQuery } from "../../mutations/facilityMutations";
 import { FacilityDto } from "../../models/facility";
 import { useUser } from "../../contexts/userContext";
@@ -54,6 +52,23 @@ function FacilitiesComponent() {
             Loading facilities...
           </Typography>
           <CircularProgress />
+        </Box>
+      ) : error || !data ? (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "50vh",
+          }}
+        >
+          <Typography variant="body1" textAlign="center" sx={{ mb: 4 }}>
+            Information about facilities could not be loaded.
+          </Typography>
+          <Button variant="contained" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
         </Box>
       ) : (
         <Box

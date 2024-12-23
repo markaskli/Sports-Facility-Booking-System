@@ -65,7 +65,7 @@ const EditFacilityDialog = (props: FacilityEditDialogProps) => {
       name: data.name,
       address: data.address,
       description: data.description,
-      pictureUrl: data.pictureUrl,
+      pictureUrl: data.pictureUrl as string | undefined,
       phoneNumber: data.phoneNumber,
       emailAddress: data.emailAddress,
       maxNumberOfParticipants: data.maxNumberOfParticipants ?? undefined,
@@ -82,7 +82,11 @@ const EditFacilityDialog = (props: FacilityEditDialogProps) => {
 
   const submitHandler = (data: FacilityFormData) => {
     editFacilityMutation.mutate(
-      { id: props.data.id, ...data },
+      {
+        id: props.data.id,
+        maxNumberOfParticipants: data.maxNumberOfParticipants ?? undefined,
+        ...data,
+      },
       {
         onSuccess: () => {
           setSnackBarMessage("Facility updated successfully!");

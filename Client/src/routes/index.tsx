@@ -7,8 +7,6 @@ import {
   Container,
   Modal,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { createFileRoute } from "@tanstack/react-router";

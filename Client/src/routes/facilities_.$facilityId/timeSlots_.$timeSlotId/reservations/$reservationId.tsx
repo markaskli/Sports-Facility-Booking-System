@@ -56,6 +56,19 @@ function ReservationDetails() {
           </Typography>
           <CircularProgress />
         </Box>
+      ) : error || !data ? (
+        // Handle error or if data is undefined/null
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          minHeight="50vh"
+        >
+          <Typography variant="body1" textAlign="center" sx={{ mb: 4 }}>
+            Reservation data not found.
+          </Typography>
+        </Box>
       ) : (
         <>
           <Card sx={{ mt: 4, maxWidth: 600, mx: "auto", p: 2 }}>
@@ -65,30 +78,32 @@ function ReservationDetails() {
                 Reservation Details
               </Typography>
               <Divider sx={{ mb: 2 }} />
-
+  
               {/* Reservation Info */}
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body1" gutterBottom>
-                  <strong>Name:</strong> {data.userName}
+                  <strong>Name:</strong> {data.userName || "N/A"}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  <strong>Email:</strong> {data.userEmail}
+                  <strong>Email:</strong> {data.userEmail || "N/A"}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  <strong>Status:</strong> {data.reservationStatus}
+                  <strong>Status:</strong> {data.reservationStatus || "N/A"}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
                   <strong>Reservation Date:</strong>{" "}
-                  {new Date(data.reservationDate).toLocaleDateString("lt-LT")}
+                  {data.reservationDate
+                    ? new Date(data.reservationDate).toLocaleDateString("lt-LT")
+                    : "Not Specified"}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
                   <strong>Number of Participants:</strong>{" "}
                   {data.numberOfParticipants ?? "Not Specified"}
                 </Typography>
               </Box>
-
+  
               <Divider sx={{ my: 2 }} />
-
+  
               {/* Action Buttons */}
               <Box display="flex" justifyContent="space-between">
                 <Button
@@ -103,9 +118,7 @@ function ReservationDetails() {
                   Back
                 </Button>
                 {data?.userId === user?.id ||
-                user?.roles.some(
-                  (role: string) => role === "SystemAdministrator"
-                ) ? (
+                user?.roles.some((role: string) => role === "SystemAdministrator") ? (
                   <Box display="flex" gap={1}>
                     <Button
                       variant="outlined"
@@ -139,14 +152,14 @@ function ReservationDetails() {
             facilityId={Number(facilityId)}
             timeSlotId={Number(timeSlotId)}
             reservationId={Number(reservationId)}
-            reservationDate={data.reservationDate}
+            reservationDate={data?.reservationDate}
             onClose={() => setDeleteDialogOpen(false)}
             setSnackBarMessage={(message) => setSnackBarMessage(message)}
             setDisplayOfSnackBarMessage={(status) => setSnackBarOpen(status)}
           />
         </>
       )}
-
+  
       <Snackbar
         open={isSnackbarOpen}
         autoHideDuration={2500}

@@ -7,7 +7,7 @@ type BaseFacilityDto = {
   pictureUrl: string | null;
   phoneNumber: string;
   emailAddress: string;
-  maxNumberOfParticipants?: number;
+  maxNumberOfParticipants?: number | null | undefined;
   facilityTypeId: number;
 };
 
@@ -27,5 +27,5 @@ export type FacilityDto = {
 
 export type CreateFacilityDto = BaseFacilityDto & {};
 export type UpdateFacilityDto = BaseFacilityDto & {
-  id: number
+  id: number;
 };
