@@ -19,6 +19,7 @@ app.UseExceptionHandler();
 
 app.UseCors(opt => {
     opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:5173");
+    opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("https://ashy-moss-0d5033503-preview.westeurope.4.azurestaticapps.net");
 });
 
 // Configure the HTTP request pipeline.
